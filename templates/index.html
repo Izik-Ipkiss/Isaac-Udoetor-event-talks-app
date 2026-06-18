@@ -741,6 +741,74 @@
             color: var(--color-feature-text);
         }
 
+        /* Sliding Switch Theme Toggle styling */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 56px;
+            height: 28px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--code-bg);
+            transition: .3s;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 6px;
+            border: 1px solid var(--border-color);
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 3px;
+            bottom: 3px;
+            background-color: var(--bg-secondary);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+            transition: .3s;
+            z-index: 2;
+        }
+
+        .slider.round {
+            border-radius: 34px;
+        }
+
+        .slider.round:before {
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: var(--primary-glow);
+            border-color: var(--primary-color);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(28px);
+            background-color: var(--primary-color);
+        }
+
+        .slider-icon {
+            font-size: 11px;
+            user-select: none;
+            z-index: 1;
+        }
+
         @media (max-width: 600px) {
             footer {
                 flex-direction: column;
@@ -762,10 +830,15 @@
             </div>
         </div>
         <div class="nav-actions">
-            <button id="theme-toggle" class="btn icon-btn" aria-label="Toggle Theme">
-                <svg class="sun-icon" style="display:none;" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
-                <svg class="moon-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
-            </button>
+            <div style="display: flex; align-items: center; gap: 0.5rem;" title="Toggle Dark/Light Mode">
+                <label class="switch">
+                    <input type="checkbox" id="theme-switch">
+                    <span class="slider round">
+                        <span class="slider-icon">☀️</span>
+                        <span class="slider-icon">🌙</span>
+                    </span>
+                </label>
+            </div>
             <button id="export-csv-btn" class="btn">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                 Export CSV
@@ -908,32 +981,18 @@
         };
 
         // Theme management
-        const themeToggleBtn = document.getElementById('theme-toggle');
-        const sunIcon = themeToggleBtn.querySelector('.sun-icon');
-        const moonIcon = themeToggleBtn.querySelector('.moon-icon');
+        const themeSwitch = document.getElementById('theme-switch');
 
-        themeToggleBtn.addEventListener('click', () => {
-            const currentTheme = document.documentElement.getAttribute('data-theme');
-            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        themeSwitch.addEventListener('change', () => {
+            const newTheme = themeSwitch.checked ? 'light' : 'dark';
             document.documentElement.setAttribute('data-theme', newTheme);
             localStorage.setItem('theme', newTheme);
-            updateThemeIcons(newTheme);
         });
-
-        function updateThemeIcons(theme) {
-            if (theme === 'dark') {
-                sunIcon.style.display = 'none';
-                moonIcon.style.display = 'block';
-            } else {
-                sunIcon.style.display = 'block';
-                moonIcon.style.display = 'none';
-            }
-        }
 
         // Initialize preferred theme
         const savedTheme = localStorage.getItem('theme') || 'dark';
         document.documentElement.setAttribute('data-theme', savedTheme);
-        updateThemeIcons(savedTheme);
+        themeSwitch.checked = (savedTheme === 'light');
 
         // Fetch Release Notes
         async function fetchReleaseNotes(forceRefresh = false) {
